@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+
+    nginx-mailcow:
+      expose:
+        - "{{ mailcow__config_http_port }}"
+
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.nginx-mailcow.entrypoints=web"
+        - "traefik.http.routers.nginx-mailcow.rule=HostRegexp(`{host:(autodiscover|autoconfig|email).+}`)"
+        - "traefik.http.routers.nginx-mailcow.entrypoints=websecure"
+        - "traefik.http.middlewares.nginx-mailcow-https-redirect.redirectscheme.scheme=https"
+        - "traefik.http.routers.nginx-mailcow.middlewares=nginx-mailcow-https-redirect"
+        - "traefik.http.routers.nginx-mailcow-secure.entrypoints=websecure"
+        - "traefik.http.routers.nginx-mailcow-secure.rule=Host(`{{ var_mailcow_host }}`)"
+        - "traefik.http.routers.nginx-mailcow-secure.tls=true"
+        - "traefik.http.routers.registry-secured.tls.certresolver={{ var_traefik_resolver }}"
+        - "traefik.http.routers.nginx-mailcow-secure.service=nginx-mailcow"
+        - "traefik.http.services.nginx-mailcow.loadbalancer.server.port={{ mailcow__config_http_port }}"
+        - "traefik.docker.network={{ var_docker_network_containers }}"
+
+      networks:
+        {{ var_docker_network_containers }}:
+
+    certdumper:
+        image: humenius/traefik-certs-dumper
+        container_name: traefik_certdumper
+        restart: unless-stopped
+        network_mode: none
+        command: --restart-containers {{ mailcow__docker_compose_project_name }}_postfix-mailcow_1,{{ mailcow__docker_compose_project_name }}_dovecot-mailcow_1
+
+        volumes:
+          - "/etc/localtime:/etc/localtime:ro"
+          - "/etc/timezone:/etc/timezone:ro"
+          - "/var/run/docker.sock:/var/run/docker.sock:ro"
+          - "{{ var_traefik_data_path }}:/traefik:ro"
+          - "./data/assets/ssl:/output:rw"
+
+        environment:
+          - "DOMAIN={{ var_mailcow_host }}"
+
+networks:
+  {{ var_docker_network_containers }}:
+    driver: bridge
+    external: true

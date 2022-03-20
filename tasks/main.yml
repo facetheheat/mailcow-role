@@ -28,6 +28,13 @@
     dest: "{{ mailcow__install_path }}"
   when: not mailcow_installed.stat.exists
 
+
+- name: "Copy docker-compose.override.yml"
+  ansible.builtin.template:
+    src: docker-compose.override.j2
+    dest: "{{ mailcow__install_path }}/docker-compose.override.yml"
+
+
 - name: Generate mailcow.conf file
   shell: ./generate_config.sh
   environment:
