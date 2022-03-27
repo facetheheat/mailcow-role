@@ -7,7 +7,7 @@ reporting {
     smtp = 'postfix';
     smtp_port = 25;
     from_name = 'Example DMARC Report';
-    msgid_from = 'rspamd.mail.{{ var_domain_name }}';
+    msgid_from = 'rspamd.{{ var_mailcow_host }}';
     max_entries = 2k;
     keys_expire = 2d;
 }
