@@ -1,0 +1,13 @@
+reporting {
+    enabled = true;
+    email = 'noreply-dmarc@{{ var_domain_name }}';
+    domain = '{{ var_domain_name }}';
+    org_name = '{{ var_mailcow_org }}';
+    helo = 'rspamd';
+    smtp = 'postfix';
+    smtp_port = 25;
+    from_name = 'Example DMARC Report';
+    msgid_from = 'rspamd.mail.{{ var_domain_name }}';
+    max_entries = 2k;
+    keys_expire = 2d;
+}
