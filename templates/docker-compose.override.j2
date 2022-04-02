@@ -52,6 +52,11 @@ services:
       depends_on:
       - rspamd-mailcow
 
+    php-fpm-mailcow:
+      labels:
+        ofelia.enabled: "true"
+        ofelia.job-exec.nextcloud-cron.schedule: "@every 5m"
+        ofelia.job-exec.nextcloud-cron.command: "su www-data -s /bin/bash -c \"/usr/local/bin/php -f /web/nextcloud/cron.php\""
 
 networks:
   {{ var_docker_network_containers }}:
