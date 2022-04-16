@@ -29,6 +29,14 @@
   when: not mailcow_installed.stat.exists
 
 
+# - name: "Recreate mailcow"
+#   shell:
+#     cmd: "{{ item }}"
+#     chdir: "{{ mailcow__install_path }}"
+#   with_items:
+#     - docker-compose down -v --rmi all || true
+#     - docker-compose rm --force || true
+
 - name: "Copy docker-compose.override.yml"
   ansible.builtin.template:
     src: docker-compose.override.j2
@@ -61,24 +69,24 @@
     src: vars.local.inc.php.j2
     dest: "{{ mailcow__install_path }}/data/web/inc/vars.local.inc.php"
 
-- name: Check if mailcow containers are running
-  become: yes
-  community.docker.docker_container_info:
-    name: "{{ mailcow__docker_compose_project_name }}_nginx-mailcow_1"
-  register: mailcow_running
+# - name: Check if mailcow containers are running
+#   become: yes
+#   community.docker.docker_container_info:
+#     name: "{{ mailcow__docker_compose_project_name }}_nginx-mailcow_1"
+#   register: mailcow_running
 
-- name: Start mailcow container stack
-  become: yes
-  community.docker.docker_compose:
-    project_src: "{{ mailcow__install_path }}"
-    project_name: "{{ mailcow__docker_compose_project_name }}"
-    state: present
-    build: no
-    pull: yes
-  when: not mailcow_running.exists
+# - name: Start mailcow container stack
+#   become: yes
+#   community.docker.docker_compose:
+#     project_src: "{{ mailcow__install_path }}"
+#     project_name: "{{ mailcow__docker_compose_project_name }}"
+#     state: present
+#     build: no
+#     pull: yes
+#   when: not mailcow_running.exists
 
-- name: Update mailcow
-  include_tasks: update.yml
-  when:
-    - mailcow_running.exists
-    - mailcow__install_updates
+# - name: Update mailcow
+#   include_tasks: update.yml
+#   when:
+#     - mailcow_running.exists
+#     - mailcow__install_updates
